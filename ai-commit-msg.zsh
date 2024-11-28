@@ -15,9 +15,7 @@ if [[ -z "$diff_context" ]]; then
 fi
 
 # 최근 3개의 커밋 메시지 가져오기
-# recent_commits=$(git log -3 --pretty=format:"%B" | sed 's/"/\\"/g')
-# 최근 커밋 메시지 (스타일 참고용):
-# $recent_commits
+recent_commits=$(git log -3 --pretty=format:"%B" | sed 's/"/\\"/g')
 
 # 프롬프트 준비
 prompt="다음 구조를 따르는 git 커밋 메시지를 생성해주세요:
@@ -33,6 +31,9 @@ prompt="다음 구조를 따르는 git 커밋 메시지를 생성해주세요:
 
 커밋 메시지만 반환하세요 - 소개, 설명, 따옴표 없이.
 한국어로 작성하세요. 단 파일 이름, 함수 이름은 원문 그대로 사용해도 좋습니다.
+
+최근 커밋 메시지 (스타일 참고용):
+$recent_commits
 
 변경사항:
 $diff_context"
