@@ -12,24 +12,15 @@ for arg in "$@"; do
     --compare=*)
       compare_branch="${arg#*=}"
       ;;
-    *)
-      # 다른 옵션들을 위한 공간
-      ;;
   esac
 done
 
 # compare_branch가 지정되지 않은 경우 기본값 'develop' 사용
 compare_branch=${compare_branch:-develop}
 
-# 현재 브랜치 이름 가져오기
-current_branch=$(git branch --show-current)
-
 # 지정된 브랜치와 비교하여 diff 생성
 git fetch origin ${compare_branch}:${compare_branch} 2>/dev/null || true
 git diff ${compare_branch} > pr.diff
-
-echo $compare_branch
-echo $current_branch
 
 # diff 내용 읽기
 diff_content=$(cat pr.diff)
@@ -45,13 +36,6 @@ PR 메시지는 다음 가이드라인을 따라야 합니다:
 - 기술 용어는 영문으로, 설명은 한국어로 작성할 것
 
 위 가이드라인에 따라 PR 메시지를 생성해주세요.
-
-분석 정보:
-제목: $title
-설명: $body
-변경된 파일 수: $changed_files
-추가된 라인: $additions
-삭제된 라인: $deletions
 
 변경사항:
 \`\`\`diff
