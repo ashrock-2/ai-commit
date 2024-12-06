@@ -28,24 +28,8 @@ current_branch=$(git branch --show-current)
 git fetch origin ${compare_branch}:${compare_branch} 2>/dev/null || true
 git diff ${compare_branch} > pr.diff
 
-# 현재 브랜치의 PR 정보 가져오기 (있는 경우)
-pr_info=$(gh pr list --head "$current_branch" --json number,title,body,additions,deletions,changedFiles --limit 1)
-
-if [[ -n "$pr_info" ]]; then
-  # PR이 있는 경우 PR 정보 추출
-  title=$(echo "$pr_info" | jq -r '.[0].title')
-  body=$(echo "$pr_info" | jq -r '.[0].body')
-  changed_files=$(echo "$pr_info" | jq -r '.[0].changedFiles')
-  additions=$(echo "$pr_info" | jq -r '.[0].additions')
-  deletions=$(echo "$pr_info" | jq -r '.[0].deletions')
-else
-  # PR이 없는 경우 기본 정보 설정
-  title="$current_branch의 변경사항 리뷰"
-  body="브랜치 $current_branch와 $compare_branch 간의 차이점 분석"
-  changed_files=$(git diff --name-only ${compare_branch} | wc -l)
-  additions=$(git diff ${compare_branch} --numstat | awk '{sum += $1} END {print sum}')
-  deletions=$(git diff ${compare_branch} --numstat | awk '{sum += $2} END {print sum}')
-fi
+echo $compare_branch
+echo $current_branch
 
 # diff 내용 읽기
 diff_content=$(cat pr.diff)
