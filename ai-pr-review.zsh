@@ -24,32 +24,45 @@ compare_branch=${compare_branch:-develop}
 # 현재 브랜치 이름 가져오기
 current_branch=$(git branch --show-current)
 
-# 현재 브랜치의 PR 번호 가져오기
+# 지정된 브랜치와 비교하여 diff 생성
+git fetch origin ${compare_branch}:${compare_branch} 2>/dev/null || true
+git diff ${compare_branch} > pr.diff
+
+# 현재 브랜치의 PR 정보 가져오기 (있는 경우)
 pr_info=$(gh pr list --head "$current_branch" --json number,title,body,additions,deletions,changedFiles --limit 1)
-if [[ -z "$pr_info" ]]; then
-  echo "에러: 현재 브랜치($current_branch)의 PR을 찾을 수 없습니다" >&2
-  exit 1
+
+if [[ -n "$pr_info" ]]; then
+  # PR이 있는 경우 PR 정보 추출
+  title=$(echo "$pr_info" | jq -r '.[0].title')
+  body=$(echo "$pr_info" | jq -r '.[0].body')
+  changed_files=$(echo "$pr_info" | jq -r '.[0].changedFiles')
+  additions=$(echo "$pr_info" | jq -r '.[0].additions')
+  deletions=$(echo "$pr_info" | jq -r '.[0].deletions')
+else
+  # PR이 없는 경우 기본 정보 설정
+  title="$current_branch의 변경사항 리뷰"
+  body="브랜치 $current_branch와 $compare_branch 간의 차이점 분석"
+  changed_files=$(git diff --name-only ${compare_branch} | wc -l)
+  additions=$(git diff ${compare_branch} --numstat | awk '{sum += $1} END {print sum}')
+  deletions=$(git diff ${compare_branch} --numstat | awk '{sum += $2} END {print sum}')
 fi
-
-# PR 정보 추출
-pr_number=$(echo "$pr_info" | jq -r '.[0].number')
-title=$(echo "$pr_info" | jq -r '.[0].title')
-body=$(echo "$pr_info" | jq -r '.[0].body')
-changed_files=$(echo "$pr_info" | jq -r '.[0].changedFiles')
-additions=$(echo "$pr_info" | jq -r '.[0].additions')
-deletions=$(echo "$pr_info" | jq -r '.[0].deletions')
-
-# PR의 diff 가져오기
-gh pr diff "$pr_number" > pr.diff
 
 # diff 내용 읽기
 diff_content=$(cat pr.diff)
 
 # 프롬프트 준비
-prompt="당신은 꼼꼼하고 건설적인 PR 리뷰를 작성하는 시니어 개발자입니다.
-아래 PR의 내용을 분석하여 상세한 리뷰를 작성해주세요.
+prompt="당신은 명확하고 상세한 PR 메시지를 작성하는 전문 개발자입니다.
+PR template과 git diff를 분석하여 적절한 PR 메시지를 생성해주세요.
 
-PR 정보:
+PR 메시지는 다음 가이드라인을 따라야 합니다:
+- PR의 목적과 주요 변경사항을 명확히 설명할 것
+- 기술적 결정사항이나 고려사항이 있다면 포함할 것
+- 테스트 방법이나 주의사항이 있다면 명시할 것
+- 기술 용어는 영문으로, 설명은 한국어로 작성할 것
+
+위 가이드라인에 따라 PR 메시지를 생성해주세요.
+
+분석 정보:
 제목: $title
 설명: $body
 변경된 파일 수: $changed_files
@@ -59,27 +72,7 @@ PR 정보:
 변경사항:
 \`\`\`diff
 $diff_content
-\`\`\`
-
-리뷰 작성 가이드라인:
-1. 코드 품질 관점:
-   - 코드 구조와 설계
-   - 성능 고려사항
-   - 잠재적인 버그나 엣지 케이스
-   - 테스트 커버리지
-
-2. 리뷰 형식:
-   - 긍정적인 피드백 포함
-   - 구체적이고 실행 가능한 제안 제시
-   - 중요도에 따라 'Major'/'Minor' 표시
-   - 코드의 특정 부분 참조 시 파일명과 라인 번호 포함
-
-3. 언어:
-   - 기술 용어는 영문으로 유지
-   - 설명과 피드백은 한국어로 작성
-   - 공손하고 건설적인 톤 유지
-
-리뷰 내용만 반환하세요 - 소개나 추가 설명 없이."
+\`\`\`"
 
 # JSON용 프롬프트 이스케이프
 json_escaped_prompt=$(jq -n --arg prompt "$prompt" '$prompt')
@@ -115,4 +108,4 @@ fi
 echo "$review_content"
 
 # 임시 파일 삭제
-rm -f pr.diff 
+rm -f pr.diff
