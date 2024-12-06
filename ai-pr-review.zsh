@@ -72,8 +72,21 @@ if [[ -z "$review_content" || "$review_content" == "null" ]]; then
   exit 1
 fi
 
-# 성공 시 리뷰 내용만 출력
-echo "$review_content"
+# 성공 시 리뷰 내용을 출력하고 클립보드에 복사
+if command -v pbcopy >/dev/null 2>&1; then
+    # macOS
+    echo "$review_content" | pbcopy
+    echo "$review_content"
+    echo "\n리뷰 내용이 클립보드에 복사되었습니다."
+elif command -v xclip >/dev/null 2>&1; then
+    # Linux with xclip
+    echo "$review_content" | xclip -selection clipboard
+    echo "$review_content"
+    echo "\n리뷰 내용이 클립보드에 복사되었습니다."
+else
+    echo "경고: pbcopy/xclip이 설치되어 있지 않아 클립보드 복사가 불가능합니다."
+    echo "$review_content"
+fi
 
 # 임시 파일 삭제
 rm -f pr.diff
