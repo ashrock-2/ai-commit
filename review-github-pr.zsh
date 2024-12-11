@@ -21,11 +21,12 @@ fi
 
 pr_url=$1
 
-# gh CLI를 사용하여 PR diff 가져오기
+# gh CLI를 사용하여 PR 정보와 diff 가져오기
+pr_info=$(gh pr view $pr_url --json title,body)
 diff_content=$(gh pr diff $pr_url)
 
 if [[ $? -ne 0 ]]; then
-  echo "에러: PR diff를 가져오는데 실패했습니다" >&2
+  echo "에러: PR 정보를 가져오는데 실패했습니다" >&2
   exit 1
 fi
 
@@ -37,6 +38,9 @@ prompt="당신은 코드 리뷰어입니다. 다음 PR의 변경사항을 검토
 3. 개선이 필요한 부분
 4. 보안 및 성능 관련 고려사항
 5. 긍정적인 피드백
+
+PR 설명:
+$pr_body
 
 변경사항:
 \`\`\`diff
