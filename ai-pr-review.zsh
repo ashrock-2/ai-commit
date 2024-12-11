@@ -27,15 +27,7 @@ diff_content=$(cat pr.diff)
 
 # 프롬프트 준비
 prompt="당신은 명확하고 상세한 PR 메시지를 작성하는 전문 개발자입니다.
-PR template과 git diff를 분석하여 적절한 PR 메시지를 생성해주세요.
-
-PR 메시지는 다음 가이드라인을 따라야 합니다:
-- PR의 목적과 주요 변경사항을 명확히 설명할 것
-- 기술적 결정사항이나 고려사항이 있다면 포함할 것
-- 테스트 방법이나 주의사항이 있다면 명시할 것
-- 기술 용어는 영문으로, 설명은 한국어로 작성할 것
-
-위 가이드라인에 따라 PR 메시지를 생성해주세요.
+git diff를 분석하여 적절한 PR 메시지를 생성해주세요.
 
 변경사항:
 \`\`\`diff
@@ -62,7 +54,7 @@ response=$(curl -s https://api.anthropic.com/v1/messages \
     }")
 
 # API 응답에서 리뷰 내용만 추출
-review_content=$(echo "$response" | tr -d '\000-\037' | jq -r '.content[0].text')
+review_content=$(echo "$response" | sed 's/.*"text":"//' | sed 's/"}],"stop_reason".*//')
 
 # 에러 발생 시에만 디버그 정보 출력
 if [[ -z "$review_content" || "$review_content" == "null" ]]; then
@@ -78,13 +70,8 @@ if command -v pbcopy >/dev/null 2>&1; then
     echo "$review_content" | pbcopy
     echo "$review_content"
     echo "\n리뷰 내용이 클립보드에 복사되었습니다."
-elif command -v xclip >/dev/null 2>&1; then
-    # Linux with xclip
-    echo "$review_content" | xclip -selection clipboard
-    echo "$review_content"
-    echo "\n리뷰 내용이 클립보드에 복사되었습니다."
 else
-    echo "경고: pbcopy/xclip이 설치되어 있지 않아 클립보드 복사가 불가능합니다."
+    echo "경고: pbcopy이 설치되어 있지 않아 클립보드 복사가 불가능합니다."
     echo "$review_content"
 fi
 
