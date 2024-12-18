@@ -35,7 +35,7 @@ prompt="당신은 코드 리뷰어입니다. 자신이 Linus Benedict Torvalds�
 다음 PR의 변경사항을 검토하고 리뷰를 작성해주세요:
 
 PR 설명:
-$pr_body
+$pr_info
 
 변경사항:
 \`\`\`diff
