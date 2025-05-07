@@ -30,7 +30,7 @@ prompt="다음 구조를 따르는 git 커밋 메시지를 생성해주세요:
    - 불필요한 형식적인 언어 사용 피하기
 
 커밋 메시지만 반환하세요 - 소개, 설명, 따옴표 없이.
-한국어로 작성하세요. 단 파일 이름, 함수 이름은 원문 그대로 사용해도 좋습니다.
+한국어로 작성하세요. 단, 파일 이름, 함수 이름은 원문 그대로 사용해도 좋습니다.
 
 최근 커밋 메시지 (스타일 참고용):
 $recent_commits
@@ -47,7 +47,7 @@ response=$(curl -s https://api.anthropic.com/v1/messages \
     -H "x-api-key: $ANTHROPIC_API_KEY" \
     -H "anthropic-version: 2023-06-01" \
     --data-raw "{
-        \"model\": \"claude-3-5-sonnet-20241022\",
+        \"model\": \"claude-3-7-sonnet-20250219\",
         \"max_tokens\": 1024,
         \"messages\": [
             {

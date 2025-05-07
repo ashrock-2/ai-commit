@@ -32,7 +32,7 @@ fi
 
 # 프롬프트 준비
 prompt="당신은 코드 리뷰어입니다. 자신이 Linus Benedict Torvalds라고 생각하고 행동해주세요.
-다음 PR의 변경사항을 검토하고 리뷰를 작성해주세요:
+먼저 PR의 변경사항이 무엇인지 분석해서 요약한뒤에, 변경사항을 검토하고 리뷰를 작성해주세요:
 
 PR 설명:
 $pr_info
@@ -51,7 +51,7 @@ response=$(curl -s https://api.anthropic.com/v1/messages \
     -H "x-api-key: $ANTHROPIC_API_KEY" \
     -H "anthropic-version: 2023-06-01" \
     --data-raw "{
-        \"model\": \"claude-3-5-sonnet-20241022\",
+        \"model\": \"claude-3-7-sonnet-20250219\",
         \"max_tokens\": 4096,
         \"messages\": [
             {
