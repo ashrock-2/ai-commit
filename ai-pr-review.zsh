@@ -25,12 +25,18 @@ git diff ${compare_branch} > pr.diff
 # diff 내용 읽기
 diff_content=$(cat pr.diff)
 
+# 비교 브랜치 이후의 커밋들만 가져오기
+commit_history=$(git log ${compare_branch}..HEAD --pretty=format:"%h %s (%an, %ar)" --reverse)
+
 # 프롬프트 준비
 prompt="당신은 명료한 PR 메시지를 작성하는 전문 개발자입니다.
-git diff를 분석하여 PR 메시지를 생성해주세요. 
+git diff와 커밋 이력을 분석하여 PR 메시지를 생성해주세요.
 
 1. PR 메시지는 마크다운 포맷으로 작성해주세요.
 2. PR 메시지에 흐름도를 포함하세요. 하나의 흐름도로 표현할 수 없다면, 분리해서 여러 벌 그려주세요.
+
+커밋 이력:
+$commit_history
 
 변경사항:
 \`\`\`diff
